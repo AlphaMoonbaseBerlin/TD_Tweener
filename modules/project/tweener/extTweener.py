@@ -2,14 +2,16 @@
 Name : extTweener
 Author : Alpha Moonbase
 Version : 0
-Build : 8
-Savetimestamp : 1660058659
+Build : 10
+Savetimestamp : 1660063257
 Saveorigin : Project.toe
 Saveversion : 2021.16410
 Info Header End'''
 
 import fade
 import tween_value
+
+_type = type
 
 class extTweener:
 
@@ -52,7 +54,7 @@ class extTweener:
 				curve = tween.get("curve", curve),
 				delay = tween.get("delay", 0)
 			)
-
+	
 	def AbsoluteTween(self, par, end, time, curve = 's', delay = 0):
 		self.CreateTween(par, end, time, curve = curve, delay = delay)
 		return
@@ -66,11 +68,13 @@ class extTweener:
 	def CreateTween(self,parameter, end:float, time:float, type:str = 'fade', curve:str = 's', id = '', mode = 'CONSTANT', expression = None, delay = 0):
 		if not isinstance( parameter, Par):
 			raise self.Exceptions.TargetIsNotParameter(f"Invalid Parameterobject {parameter}")
-
+		
 		target_value 	= tween_value.tween_value_from_arguments( parameter, mode, expression, end )
 		start_value 	= tween_value.tween_value_from_parameter( parameter )
 
 		fade_class:fade.tween  	= getattr( fade, type, fade.startsnap )
+		debug("Creating fade for parameter", parameter)
+		debug("Got fade_class", fade_class)
 		fade_object = fade_class( parameter, time, start_value, target_value, interpolation = curve) 
 		fade_object.Delay( delay )
 		self.fades[self.getFadeId( parameter )] = fade_object

@@ -2,8 +2,8 @@
 Name : tween_value
 Author : Alpha Moonbase
 Version : 0
-Build : 7
-Savetimestamp : 1660057980
+Build : 10
+Savetimestamp : 1660064238
 Saveorigin : Project.toe
 Saveversion : 2021.16410
 Info Header End'''
@@ -29,8 +29,8 @@ class expression_value( tween_value ):
         
 
 class static_value( tween_value ):
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, parameter, value):
+        self.value = type( parameter.val)(value)
 
     def eval(self):
         return self.value
@@ -40,9 +40,9 @@ class static_value( tween_value ):
 
 def tween_value_from_parameter( parameter:td.Par ):
     if parameter.mode.name =="EXPRESSION": return expression_value( parameter, parameter.expr )
-    return static_value( parameter.eval() )
+    return static_value( parameter, parameter.eval() )
 
 def tween_value_from_arguments( parameter:td.Par, mode:str, expression:str, value:any):
     if mode.upper() =="EXPRESSION" and expression: return expression_value( parameter, expression )
-    return static_value( value )
+    return static_value( parameter, value )
 
