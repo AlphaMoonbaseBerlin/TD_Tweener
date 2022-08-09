@@ -2,8 +2,8 @@
 Name : extTweener
 Author : Alpha Moonbase
 Version : 0
-Build : 6
-Savetimestamp : 1659987093
+Build : 8
+Savetimestamp : 1660058659
 Saveorigin : Project.toe
 Saveversion : 2021.16410
 Info Header End'''
@@ -70,9 +70,10 @@ class extTweener:
 		target_value 	= tween_value.tween_value_from_arguments( parameter, mode, expression, end )
 		start_value 	= tween_value.tween_value_from_parameter( parameter )
 
-		debug( type(target_value), type( start_value) )
 		fade_class:fade.tween  	= getattr( fade, type, fade.startsnap )
-		self.fades[self.getFadeId( parameter )] = fade_class( parameter, time, start_value, target_value, interpolation = curve) 
+		fade_object = fade_class( parameter, time, start_value, target_value, interpolation = curve) 
+		fade_object.Delay( delay )
+		self.fades[self.getFadeId( parameter )] = fade_object
 		
 
 	def StopFade(self,par):
