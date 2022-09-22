@@ -2,14 +2,17 @@
 Name : extTweener
 Author : Alpha Moonbase
 Version : 0
-Build : 10
-Savetimestamp : 1660063257
+Build : 12
+Savetimestamp : 1663849167
 Saveorigin : Project.toe
-Saveversion : 2021.16410
+Saveversion : 2022.28040
 Info Header End'''
 
 import fade
 import tween_value
+
+from typing import Union, Hashable
+
 
 _type = type
 
@@ -18,21 +21,20 @@ class extTweener:
 	def __init__(self, ownerComp):
 		# The component to which this extension is attached
 		self.ownerComp 	= ownerComp
-		self.fades:dict 	= {}
+		self.Tweens:dict 	= {}
 	
 		self.Exceptions = mod.tweener_exceptions
 								
-		self.delay_script 	= "me.CreateTween( args[0], args[1], args[2], type = args[3], curve = args[4], id = args[5], mode = args[6], expression = args[7], delay = 0)"
 		self.callback 		= self.ownerComp.op('callbackManager')
 
 	def getFadeId(self, par):
 		return hash(par)
 
 	def FadeStep(self, step_in_ms = None):
-		fadesCopy = self.fades.copy()
+		fadesCopy = self.Tweens.copy()
 		for fade_id, tween_object in fadesCopy.items():
 			tween_object.Step(step_in_ms)
-			if tween_object.done: del self.fades[ fade_id ]
+			if tween_object.done: del self.Tweens[ fade_id ]
 		
 
 	def AbsoluteTweens(self, list_of_tweens, curve = "s", time=1):
@@ -65,7 +67,15 @@ class extTweener:
 		self.CreateTween(par, end, time, curve = curve, delay = delay)
 		return
 	
-	def CreateTween(self,parameter, end:float, time:float, type:str = 'fade', curve:str = 's', id = '', mode = 'CONSTANT', expression = None, delay = 0):
+	def CreateTween(self,parameter, 
+					end:float, 
+					time:float, 
+					type:str 					= 'fade', 
+					curve:str 					= 's', 
+					id:Hashable 				= '', 
+					mode:Union[str, ParMode] 	= 'CONSTANT', 
+					expression:str 				= None, 
+					delay:float 				= 0.0):
 		if not isinstance( parameter, Par):
 			raise self.Exceptions.TargetIsNotParameter(f"Invalid Parameterobject {parameter}")
 		
@@ -73,21 +83,19 @@ class extTweener:
 		start_value 	= tween_value.tween_value_from_parameter( parameter )
 
 		fade_class:fade.tween  	= getattr( fade, type, fade.startsnap )
-		debug("Creating fade for parameter", parameter)
-		debug("Got fade_class", fade_class)
-		fade_object = fade_class( parameter, time, start_value, target_value, interpolation = curve) 
+		fade_object 			= fade_class( parameter, time, start_value, target_value, interpolation = curve) 
 		fade_object.Delay( delay )
-		self.fades[self.getFadeId( parameter )] = fade_object
+		self.Tweens[id or self.getFadeId( parameter )] = fade_object
 		
 
 	def StopFade(self,par):
-		del self.fades[self.getFadeId(par)]
+		del self.Tweens[self.getFadeId(par)]
 
 	def StopAllFades(self):
-		self.fades = {}
+		self.Tweens = {}
 
 	def ClearFades(self):
-		self.fades.clear()
+		self.Tweens.clear()
 
 	def PrintFades(self):
-		print(self.fades)
+		print(self.Tweens)

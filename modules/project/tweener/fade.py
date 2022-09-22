@@ -2,16 +2,16 @@
 Name : fade
 Author : Alpha Moonbase
 Version : 0
-Build : 12
-Savetimestamp : 1660059262
+Build : 13
+Savetimestamp : 1663850219
 Saveorigin : Project.toe
-Saveversion : 2021.16410
+Saveversion : 2022.28040
 Info Header End'''
 import tween_value
 import td, math
 from dataclasses import dataclass
 
-curves = op("curves")
+
 
 @dataclass
 class tween:
@@ -44,7 +44,7 @@ class fade( tween ):
 
 	def Step(self, stepsize = None):
 		self.increment_step(stepsize)
-		
+		curves = op("curves_repo").Repo
 		curve_value = curves.GetValue( self.current_step, self.time, self.interpolation )
 		start_evaluated = self.start_value.eval()
 		target_evaluated = self.target_value.eval()
