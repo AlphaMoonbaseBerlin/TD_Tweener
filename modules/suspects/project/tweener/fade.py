@@ -1,39 +1,41 @@
 
 '''Info Header Start
 Name : fade
-Author : Alpha Moonbase
+Author : Wieland@AMB-ZEPH15
 Version : 0
-Build : 13
-Savetimestamp : 1663850219
+Build : 15
+Savetimestamp : 2023-08-11T18:01:25.750912
 Saveorigin : Project.toe
 Saveversion : 2022.28040
 Info Header End'''
 import tween_value
-import td, math
-from dataclasses import dataclass
+import td
+from dataclasses import dataclass, field
 
 
+import typing
 
 @dataclass
-class tween:
+class _tween:
 	parameter		:	td.Par
 	time			:   float
-	start_value		:	tween_value.tween_value
-	target_value	:   tween_value.tween_value
-	interpolation	:	str = "LinearInterpolation"
-	current_step	:	float 	= 0
+	startValue		:	tween_value._tweenValue
+	targetValue		:   tween_value._tweenValue
+	interpolation	:	str 			= "LinearInterpolation"
+	_currentStep	:	float 			= field( default= 0, repr=False)
+	_callback		: 	typing.Callable = field( default = lambda value: None, repr=False)
 
-	def increment_step(self, stepsize):
+	def _incrementStep(self, stepsize):
 		stepsize = stepsize or absTime.stepSeconds
-		self.current_step += stepsize
+		self._currentStep += stepsize
 		#self.current_step = tdu.clamp( self.current_step + stepsize, 0, self.time )
 
 	@property
 	def done(self):
-		return self.current_step >= self.time
+		return self._currentStep >= self.time
 
 	def Delay(self, offset):
-		self.current_step -= abs(offset)
+		self._currentStep -= abs(offset)
 
 	def Step(self, stepsize = None):
 		pass
@@ -41,34 +43,35 @@ class tween:
 	def Finish(self):
 		pass
 		
-class fade( tween ):
-
+class fade( _tween ):
 	def Step(self, stepsize = None):
-		self.increment_step(stepsize)
-		curves = op("curves_repo").Repo
-		curve_value = curves.GetValue( self.current_step, self.time, self.interpolation )
-		start_evaluated = self.start_value.eval()
-		target_evaluated = self.target_value.eval()
-		difference = target_evaluated - start_evaluated
-		new_value = start_evaluated + difference * curve_value
+		self._incrementStep(stepsize)
+		curves 				= op("curves_repo").Repo
+		curve_value 		= curves.GetValue( self._currentStep, self.time, self.interpolation )
+		start_evaluated 	= self.startValue.eval()
+		target_evaluated 	= self.targetValue.eval()
+		difference 			= target_evaluated - start_evaluated
+		new_value 			= start_evaluated + difference * curve_value
 		self.parameter.val = new_value
 		if self.done: self.Finish()
 
 	def Finish(self):
-		self.target_value.assign_to_par( self.parameter )
+		self.targetValue.assignToPar( self.parameter )
+		self._callback( self )
 
-class endsnap( tween ):
+class endsnap( _tween ):
 
 	def Step(self, stepsize = None):
-		self.increment_step(stepsize)
+		self._incrementStep(stepsize)
 		if self.done: self.Finish
 
 	def Finish(self):
-		self.target_value.assign_to_par( self.parameter )
+		self.targetValue.assignToPar( self.parameter )
+		self._callback( self )
 
-class startsnap( tween ):
+class startsnap( _tween ):
 
 	def Step(self, stepsize = None):
-		self.target_value.assign_to_par( self.parameter )
-		self.increment_step(stepsize)
+		self.targetValue.assignToPar( self.parameter )
+		self._incrementStep(stepsize)
 

@@ -1,19 +1,22 @@
 
 '''Info Header Start
 Name : extTweener
-Author : Alpha Moonbase
+Author : Wieland@AMB-ZEPH15
 Version : 0
-Build : 12
-Savetimestamp : 1663849167
+Build : 15
+Savetimestamp : 2023-08-11T18:01:25.138544
 Saveorigin : Project.toe
 Saveversion : 2022.28040
 Info Header End'''
 
 import fade
 import tween_value
+import tweener_exceptions
 
-from typing import Union, Hashable
-
+from typing import Callable, Union, Hashable, Dict
+from argparse import Namespace
+def _emptyCallback( value ):
+	pass
 
 _type = type
 
@@ -21,12 +24,18 @@ class extTweener:
 
 	def __init__(self, ownerComp):
 		# The component to which this extension is attached
-		self.ownerComp 	= ownerComp
-		self.Tweens:dict 	= {}
-	
-		self.Exceptions = mod.tweener_exceptions
-								
-		self.callback 		= self.ownerComp.op('callbackManager')
+		self.ownerComp 						= ownerComp
+		self.Tweens:Dict[int, fade.tween] 	= {}
+
+		self.Modules = Namespace(
+			Exceptions 	= tweener_exceptions
+		)
+		self.Constructor = Namespace(
+			Expression 	= tween_value.expressionValue,
+			Static 		= tween_value.staticValue,
+			FromPar		= tween_value.tweenValueFromParameter
+		)
+		self.callback 						= self.ownerComp.op('callbackManager')
 
 	def getFadeId(self, par):
 		return hash(par)
@@ -44,8 +53,9 @@ class extTweener:
 				tween["par"],
 				tween["end"],
 				tween.get("time", time),
-				curve = tween.get("curve", curve),
-				delay = tween.get("delay", 0)
+				curve 		= tween.get("curve", curve),
+				delay 		= tween.get("delay", 0),
+				callback	= tween.get( "callaback", _emptyCallback)
 			)
 
 	def RelativeTweens(self, list_of_tweens, curve = "s", time=1):
@@ -54,18 +64,19 @@ class extTweener:
 				tween["par"],
 				tween["end"],
 				tween.get("time", time),
-				curve = tween.get("curve", curve),
-				delay = tween.get("delay", 0)
+				curve 		= tween.get("curve", curve),
+				delay 		= tween.get("delay", 0),
+				callback	= tween.get( "callaback", _emptyCallback)
 			)
 	
-	def AbsoluteTween(self, par, end, time, curve = 's', delay = 0):
-		self.CreateTween(par, end, time, curve = curve, delay = delay)
+	def AbsoluteTween(self, par, end, time, curve = 's', delay = 0, callback: Callable = _emptyCallback):
+		self.CreateTween(par, end, time, curve = curve, delay = delay, callback = callback)
 		return
 
-	def RelativeTween(self, par, end, speed, curve = 's', delay = 0):
+	def RelativeTween(self, par, end, speed, curve = 's', delay = 0, callback: Callable = _emptyCallback):
 		difference = abs(end - par.eval())
 		time = difference / speed
-		self.CreateTween(par, end, time, curve = curve, delay = delay)
+		self.CreateTween(par, end, time, curve = curve, delay = delay, callback = callback)
 		return
 	
 	def CreateTween(self,parameter, 
@@ -76,17 +87,18 @@ class extTweener:
 					id:Hashable 				= '', 
 					mode:Union[str, ParMode] 	= 'CONSTANT', 
 					expression:str 				= None, 
-					delay:float 				= 0.0):
+					delay:float 				= 0.0,
+					callback: Callable 			= _emptyCallback ):
 		if not isinstance( parameter, Par):
 			raise self.Exceptions.TargetIsNotParameter(f"Invalid Parameterobject {parameter}")
 		
-		target_value 	= tween_value.tween_value_from_arguments( parameter, mode, expression, end )
-		start_value 	= tween_value.tween_value_from_parameter( parameter )
+		targetValue:tween_value._tweenValue 	= tween_value.tweenValueFromArguments( parameter, mode, expression, end )
+		startValue:tween_value._tweenValue 		= tween_value.tweenValueFromParameter( parameter )
 
-		fade_class:fade.tween  	= getattr( fade, type, fade.startsnap )
-		fade_object 			= fade_class( parameter, time, start_value, target_value, interpolation = curve) 
-		fade_object.Delay( delay )
-		self.Tweens[id or self.getFadeId( parameter )] = fade_object
+		fadeClass:fade.fade  	= getattr( fade, type, fade.startsnap )
+		fadeObject 				= fadeClass( parameter, time, startValue, targetValue, interpolation = curve, _callback = callback) 
+		fadeObject.Delay( delay )
+		self.Tweens[id or self.getFadeId( parameter )] = fadeObject
 		
 
 	def StopFade(self,par):
