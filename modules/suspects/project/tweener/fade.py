@@ -1,12 +1,10 @@
 
+
 '''Info Header Start
 Name : fade
 Author : Wieland@AMB-ZEPH15
-Version : 0
-Build : 15
-Savetimestamp : 2023-08-11T18:01:25.750912
 Saveorigin : Project.toe
-Saveversion : 2022.28040
+Saveversion : 2022.32660
 Info Header End'''
 import tween_value
 import td
@@ -17,7 +15,7 @@ import typing
 
 @dataclass
 class _tween:
-	parameter		:	td.Par
+	parameter		:	Par
 	time			:   float
 	startValue		:	tween_value._tweenValue
 	targetValue		:   tween_value._tweenValue
@@ -25,7 +23,7 @@ class _tween:
 	_currentStep	:	float 			= field( default= 0, repr=False)
 	_callback		: 	typing.Callable = field( default = lambda value: None, repr=False)
 
-	def _incrementStep(self, stepsize):
+	def _incrementStep(self, stepsize:float):
 		stepsize = stepsize or absTime.stepSeconds
 		self._currentStep += stepsize
 		#self.current_step = tdu.clamp( self.current_step + stepsize, 0, self.time )
@@ -34,10 +32,10 @@ class _tween:
 	def done(self):
 		return self._currentStep >= self.time
 
-	def Delay(self, offset):
+	def Delay(self, offset:float):
 		self._currentStep -= abs(offset)
 
-	def Step(self, stepsize = None):
+	def Step(self, stepsize:float = None):
 		pass
 		
 	def Finish(self):
@@ -61,7 +59,7 @@ class fade( _tween ):
 
 class endsnap( _tween ):
 
-	def Step(self, stepsize = None):
+	def Step(self, stepsize:float = None):
 		self._incrementStep(stepsize)
 		if self.done: self.Finish
 
@@ -71,7 +69,7 @@ class endsnap( _tween ):
 
 class startsnap( _tween ):
 
-	def Step(self, stepsize = None):
+	def Step(self, stepsize:float = None):
 		self.targetValue.assignToPar( self.parameter )
 		self._incrementStep(stepsize)
 
