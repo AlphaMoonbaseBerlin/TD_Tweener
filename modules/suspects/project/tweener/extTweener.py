@@ -100,11 +100,11 @@ class extTweener:
 					time	:float, 
 					type	:str				= 'fade', 
 					curve	:str				= 's', 
-					id		:Hashable			= '', 
 					mode	:Union[str, ParMode]= 'CONSTANT', 
 					expression	:str			= None, 
 					delay		:float			= 0.0,
-					callback	:Callable		= _emptyCallback ):
+					callback	:Callable		= _emptyCallback,
+					id		:Hashable			= '',  ):
 		if not isinstance( parameter, Par):
 			raise self.Exceptions.TargetIsNotParameter(f"Invalid Parameterobject {parameter}")
 		
@@ -112,9 +112,10 @@ class extTweener:
 		startValue	:tween_value._tweenValue 	= tween_value.tweenValueFromParameter( parameter )
 
 		fadeClass:fade.fade  	= getattr( fade, type, fade.startsnap )
-		fadeObject 				= fadeClass( parameter, time, startValue, targetValue, interpolation = curve, _callback = callback) 
+		fadeObject 				= fadeClass( parameter, time, startValue, targetValue, interpolation = curve, id = id, _callback = callback) 
 		fadeObject.Delay( delay )
-		self.Tweens[id or self.getFadeId( parameter )] = fadeObject
+		#self.Tweens[id or self.getFadeId( parameter )] = fadeObject
+		self.Tweens[self.getFadeId( parameter )] = fadeObject
 		
 
 	def StopFade(self,par):

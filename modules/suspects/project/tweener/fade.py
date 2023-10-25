@@ -20,6 +20,7 @@ class _tween:
 	startValue		:	tween_value._tweenValue
 	targetValue		:   tween_value._tweenValue
 	interpolation	:	str 			= "LinearInterpolation"
+	id				:	str				= ""
 	_currentStep	:	float 			= field( default= 0, repr=False)
 	_callback		: 	typing.Callable = field( default = lambda value: None, repr=False)
 

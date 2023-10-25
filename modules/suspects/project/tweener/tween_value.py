@@ -1,5 +1,3 @@
-
-
 '''Info Header Start
 Name : tween_value
 Author : Wieland@AMB-ZEPH15
@@ -14,6 +12,13 @@ from functools import lru_cache
 from typing import Union
 
 par_modes = [parmode.name.upper() for parmode in ParMode._value2member_map_.values()]
+
+
+@lru_cache(maxsize=None)
+def getParamaterTypecast(parameter):
+    if parameter.style  == "Pulse": return bool
+    if parameter.style == "Toggle": return lambda value: bool(float(value))
+    return type( parameter.val )
 
 class _tweenValue:
     def eval(self):
@@ -37,7 +42,7 @@ class expressionValue( _tweenValue ):
 
 class staticValue( _tweenValue ):
     def __init__(self, parameter:Par, value:any):
-        self.value = type( parameter.val)(value)
+        self.value = getParamaterTypecast( parameter )(value)
 
     def eval(self):
         return self.value
